@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" :class="{ 'dark-mode': isDarkMode }">
     <img alt="Logo" src="./assets/source.png" class="custom-img">
     <LandingPage :isDarkMode="isDarkMode" @toggleDarkMode="toggleDarkMode"></LandingPage>
   </div>
@@ -21,6 +21,11 @@ export default {
   methods: {
     toggleDarkMode() {
       this.isDarkMode = !this.isDarkMode;
+      if (this.isDarkMode) {
+        document.body.classList.add('dark-mode');
+      } else {
+        document.body.classList.remove('dark-mode');
+      }
     }
   }
 }
@@ -40,6 +45,11 @@ export default {
   height: auto;
 }
 .dark-mode {
+  background-color: #333;
+  color: #fff;
+}
+
+body.dark-mode {
   background-color: #333;
   color: #fff;
 }

@@ -39,7 +39,8 @@ export default {
   methods: {
     getWeather() {
       this.city = this.cityInput;
-      const apiKey = 'c1c196fb0c0c859e245cd4485423b258';
+      const apiKey = process.env.WEATHER_API_KEY;
+      console.log()
       const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${this.city}&appid=${apiKey}&units=metric`;
 
       axios.get(apiUrl)
