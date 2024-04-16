@@ -1,48 +1,57 @@
 <template>
-  <div>
-    <h1>Wetter-App</h1>
-    <input class="input_city" v-model="location" placeholder="Standort eingeben">
-    <button class="button1" @click="getWeather">Wetter abrufen</button>
-    <div v-if="weather">
-      <h2>{{ weather.name }}</h2>
-      <p>{{ weather.weather[0].description }}</p>
-      <p>Temperatur: {{ weather.main.temp }}°C</p>
-      <p>Luftfeuchtigkeit: {{ weather.main.humidity }}%</p>
+  <div :class="{ 'dark-mode': isDarkMode }">
+    <div class="toggle-dark-mode" @click="$emit('toggleDarkMode')">
+      <span v-if="isDarkMode">🌞</span>
+      <span v-else>🌙</span>
     </div>
-    <div v-if="error">{{ error }}</div>
+    <h1>Weather-App</h1>
+    <input class="input_city" v-model="cityInput" placeholder="City">
+    <button class="button1" @click="getWeather">Show weather</button>
+    <div v-if="weatherData">
+      <h2>{{ city }}</h2>
+      <p>Temperature: {{ weatherData.main.temp }}°C</p>
+      <p>Weather: {{ weatherData.weather[0].description }}</p>
+    </div>
+    <div v-if="errorMessage">
+      <p>{{ errorMessage }}</p>
+    </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
+  props: {
+    isDarkMode: {
+      type: Boolean,
+      required: true
+    }
+  },
   data() {
     return {
-      location: '',
-      weather: null,
-      error: ''
+      cityInput: '',
+      city: '',
+      weatherData: null,
+      errorMessage: ''
     };
   },
   methods: {
-    async getWeather() {
-      try {
-        const apiKey = process.env.VUE_APP_WEATHER_API_KEY;
-        const geoResponse = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${this.location}&limit=1&appid=${apiKey}`);
-        
-        if (!geoResponse.ok) {
-          throw new Error('Standort nicht gefunden');
-        }
-        const geoData = await geoResponse.json();
-        const { lat, lon } = geoData[0];
-        const weatherResponse = await fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
-        if (!weatherResponse.ok) {
-          throw new Error('Wetterdaten konnten nicht abgerufen werden');
-        }
-        this.weather = await weatherResponse.json();
-        this.error = '';
-      } catch (error) {
-        this.weather = null;
-        this.error = error.message;
-      }
+    getWeather() {
+      this.city = this.cityInput;
+      const apiKey = 'c1c196fb0c0c859e245cd4485423b258';
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${this.city}&appid=${apiKey}&units=metric`;
+
+      axios.get(apiUrl)
+        .then(response => {
+          this.weatherData = response.data;
+          this.errorMessage = '';
+        })
+        .catch(error => {
+          this.weatherData = null;
+          this.errorMessage = 'No data. Check if name is written correctly.';
+          console.error('Error fetching weather data:', error);
+        });
     }
   }
 };
@@ -56,5 +65,17 @@ export default {
 
 .button1 {
   border-radius: 5px;
+}
+
+.toggle-dark-mode {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.dark-mode {
+  background-color: #333;
+  color: #fff;
 }
 </style>
